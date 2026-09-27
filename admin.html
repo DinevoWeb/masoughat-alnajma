@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>إدارة مصوغات النجمة</title>
+<style>
+:root{--cream:#f8f4eb;--paper:#fffdfa;--gold:#b58a2c;--gold2:#d7bb72;--ink:#1d1912;--muted:#776e60;--line:#eadcb8;--danger:#9d3434}
+*{box-sizing:border-box}body{margin:0;background:var(--cream);color:var(--ink);font-family:Tahoma,Arial,sans-serif}
+.wrap{max-width:920px;margin:auto;padding:22px}.card{background:var(--paper);border:1px solid var(--line);border-radius:22px;padding:20px;margin:16px 0;box-shadow:0 10px 35px rgba(82,61,14,.06)}
+h1,h2{margin-top:0}.muted{color:var(--muted);line-height:1.8}.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+label{display:block;font-weight:bold;margin:10px 0 6px}input,select,textarea,button{width:100%;font:inherit;border-radius:13px;padding:12px;border:1px solid var(--line);background:#fff}
+textarea{min-height:90px;resize:vertical}button{cursor:pointer;background:var(--gold);color:white;font-weight:bold;border:none;margin-top:12px}
+button.secondary{background:#eee7d7;color:var(--ink)}button.danger{background:var(--danger)}
+.hidden{display:none!important}.top{display:flex;align-items:center;justify-content:space-between;gap:12px}.top button{width:auto;margin:0}
+.msg{margin-top:12px;padding:10px;border-radius:12px;background:#f4ecd9;line-height:1.6}
+.product{display:grid;grid-template-columns:76px 1fr auto;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}
+.product img{width:76px;height:76px;object-fit:cover;border-radius:12px;background:#eee}.actions{display:flex;gap:7px}.actions button{width:auto;padding:9px 11px;margin:0}
+@media(max-width:650px){.grid{grid-template-columns:1fr}.product{grid-template-columns:60px 1fr}.product img{width:60px;height:60px}.actions{grid-column:1/-1}.actions button{flex:1}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <section id="loginCard" class="card">
+    <h1>مصوغات النجمة</h1>
+    <p class="muted">لوحة الإدارة — سجّل الدخول بحساب الأدمن الذي أنشأته في Supabase.</p>
+    <label>البريد الإلكتروني</label><input id="email" type="email" autocomplete="username">
+    <label>كلمة السر</label><input id="password" type="password" autocomplete="current-password">
+    <button id="loginBtn">دخول</button>
+    <div id="loginMsg" class="msg hidden"></div>
+  </section>
+
+  <main id="admin" class="hidden">
+    <div class="top"><h1>لوحة الإدارة 💎</h1><button id="logoutBtn" class="secondary">تسجيل خروج</button></div>
+    <section class="card">
+      <h2 id="formTitle">إضافة منتج</h2>
+      <input id="editId" type="hidden">
+      <div class="grid">
+        <div><label>اسم المنتج</label><input id="name"></div>
+        <div><label>الوزن</label><input id="weight" placeholder="مثال: 12.5 غرام"></div>
+        <div><label>القسم</label><select id="category"></select></div>
+        <div><label>قطعة مميزة؟</label><select id="featured"><option value="false">لا</option><option value="true">نعم</option></select></div>
+      </div>
+      <label>الوصف</label><textarea id="description"></textarea>
+      <label>صور المنتج</label><input id="images" type="file" accept="image/*" multiple>
+      <button id="saveBtn">حفظ المنتج</button>
+      <button id="cancelBtn" class="secondary hidden">إلغاء التعديل</button>
+      <div id="formMsg" class="msg hidden"></div>
+    </section>
+
+    <section class="card">
+      <h2>المنتجات</h2>
+      <div id="products"><p class="muted">جاري التحميل...</p></div>
+    </section>
+  </main>
+</div>
+
+<script>
+const SUPABASE_URL='https://zlexolhjqdbdhdduglox.supabase.co';
+const KEY='sb_publishable_O93NmDuscyE6OqUKd9epOw_nCMuYrYW';
+let token='', categories=[], products=[];
+
+const $=id=>document.getElementById(id);
+function msg(id,text){$(id).textContent=text;$(id).classList.remove('hidden')}
+function clearMsg(id){$(id).classList.add('hidden')}
+async function api(path,opt={}){
+  const headers={apikey:KEY,Authorization:'Bearer '+(token||KEY),...(opt.headers||{})};
+  const r=await fetch(SUPABASE_URL+path,{...opt,headers});
+  if(!r.ok) throw new Error(await r.text() || ('HTTP '+r.status));
+  const t=await r.text(); return t?JSON.parse(t):null;
+}
+async function login(){
+  clearMsg('loginMsg');
+  try{
+    const r=await fetch(SUPABASE_URL+'/auth/v1/token?grant_type=password',{method:'POST',headers:{apikey:KEY,'Content-Type':'application/json'},body:JSON.stringify({email:$('email').value.trim(),password:$('password').value})});
+    const d=await r.json(); if(!r.ok) throw new Error(d.error_description||d.msg||'فشل تسجيل الدخول');
+    token=d.access_token; sessionStorage.setItem('najma_token',token); await start();
+  }catch(e){msg('loginMsg','تعذر الدخول: '+e.message)}
+}
+async function start(){
+  $('loginCard').classList.add('hidden');$('admin').classList.remove('hidden');
+  try{await loadCategories();await loadProducts()}catch(e){msg('formMsg','تعذر تحميل البيانات: '+e.message)}
+}
+async function loadCategories(){
+  categories=await api('/rest/v1/categories?select=id,name&order=id');
+  $('category').innerHTML=categories.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('');
+}
+async function loadProducts(){
+  products=await api('/rest/v1/products?select=*&order=id.desc');
+  const imgs=await api('/rest/v1/product_images?select=product_id,image_url,sort_order&order=sort_order');
+  const first={}; (imgs||[]).forEach(i=>{if(!first[i.product_id])first[i.product_id]=i.image_url});
+  $('products').innerHTML=products.length?products.map(p=>`<div class="product">
+    ${first[p.id]?`<img src="${esc(first[p.id])}" alt="">`:'<div></div>'}
+    <div><b>${esc(p.name||'بدون اسم')}</b><div class="muted">${esc(p.weight||'')} ${p.code?' • '+esc(p.code):''}</div></div>
+    <div class="actions"><button onclick="editProduct(${p.id})">تعديل</button><button class="danger" onclick="deleteProduct(${p.id})">حذف</button></div>
+  </div>`).join(''):'<p class="muted">لا توجد منتجات بعد.</p>';
+}
+async function uploadImages(productId,files){
+  let n=0;
+  for(const file of files){
+    const safe=(Date.now()+'-'+n+'-'+file.name).replace(/[^a-zA-Z0-9._-]/g,'_');
+    const path=productId+'/'+safe;
+    const r=await fetch(SUPABASE_URL+'/storage/v1/object/product-images/'+encodeURI(path),{method:'POST',headers:{apikey:KEY,Authorization:'Bearer '+token,'Content-Type':file.type||'application/octet-stream'},body:file});
+    if(!r.ok) throw new Error(await r.text());
+    const url=SUPABASE_URL+'/storage/v1/object/public/product-images/'+path;
+    await api('/rest/v1/product_images',{method:'POST',headers:{'Content-Type':'application/json',Prefer:'return=minimal'},body:JSON.stringify({product_id:productId,image_url:url,sort_order:++n})});
+  }
+}
+async function saveProduct(){
+  clearMsg('formMsg'); $('saveBtn').disabled=true;
+  try{
+    const body={name:$('name').value.trim(),weight:$('weight').value.trim()||null,description:$('description').value.trim()||null,category_id:Number($('category').value),featured:$('featured').value==='true'};
+    if(!body.name) throw new Error('اكتب اسم المنتج');
+    const id=$('editId').value;
+    if(id){
+      await api('/rest/v1/products?id=eq.'+id,{method:'PATCH',headers:{'Content-Type':'application/json',Prefer:'return=minimal'},body:JSON.stringify(body)});
+      if($('images').files.length) await uploadImages(Number(id),$('images').files);
+      msg('formMsg','تم تعديل المنتج ✅');
+    }else{
+      const rows=await api('/rest/v1/products',{method:'POST',headers:{'Content-Type':'application/json',Prefer:'return=representation'},body:JSON.stringify(body)});
+      const p=rows&&rows[0]; if(!p) throw new Error('تم الحفظ لكن لم يرجع رقم المنتج');
+      if($('images').files.length) await uploadImages(p.id,$('images').files);
+      msg('formMsg','تمت إضافة المنتج وصوره ✅');
+    }
+    resetForm(); await loadProducts();
+  }catch(e){msg('formMsg','تعذر الحفظ: '+e.message)}
+  finally{$('saveBtn').disabled=false}
+}
+function editProduct(id){
+  const p=products.find(x=>x.id===id); if(!p)return;
+  $('editId').value=p.id;$('name').value=p.name||'';$('weight').value=p.weight||'';$('description').value=p.description||'';$('category').value=p.category_id||'';$('featured').value=String(!!p.featured);
+  $('formTitle').textContent='تعديل المنتج';$('cancelBtn').classList.remove('hidden');window.scrollTo({top:0,behavior:'smooth'});
+}
+function resetForm(){
+  $('editId').value='';$('name').value='';$('weight').value='';$('description').value='';$('featured').value='false';$('images').value='';$('formTitle').textContent='إضافة منتج';$('cancelBtn').classList.add('hidden');
+}
+async function deleteProduct(id){
+  if(!confirm('حذف هذا المنتج؟'))return;
+  try{
+    await api('/rest/v1/product_images?product_id=eq.'+id,{method:'DELETE',headers:{Prefer:'return=minimal'}});
+    await api('/rest/v1/products?id=eq.'+id,{method:'DELETE',headers:{Prefer:'return=minimal'}});
+    await loadProducts();
+  }catch(e){alert('تعذر الحذف: '+e.message)}
+}
+function esc(v){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+$('loginBtn').onclick=login;$('saveBtn').onclick=saveProduct;$('cancelBtn').onclick=resetForm;
+$('logoutBtn').onclick=()=>{sessionStorage.removeItem('najma_token');location.reload()};
+token=sessionStorage.getItem('najma_token')||''; if(token) start();
+</script>
+</body></html>
