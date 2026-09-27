@@ -656,6 +656,8 @@ featured.innerHTML='';
     grid.innerHTML=arr.map((p,i)=>productCard(p,i)).join('') || '<p>لا توجد نتائج.</p>';
   }
   window.renderFeaturedPage = renderFeaturedPage;
+  window.renderSections = renderSections;
+  window.alNajmaRoute = route;
 
   function renderCategory(id){
     const c=categories.find(x=>x.id===id);
@@ -868,49 +870,32 @@ featured.innerHTML='';
 </footer>
 
 <script>
-/* AL NAJMA V32 — Supabase is the single source of truth for products */
+/* AL NAJMA V33 — Supabase live catalogue */
 (async()=>{
  const U='https://zlexolhjqdbdhdduglox.supabase.co',K='sb_publishable_O93NmDuscyE6OqUKd9epOw_nCMuYrYW';
  const H={apikey:K,Authorization:'Bearer '+K,Accept:'application/json'};
  const get=async q=>{const r=await fetch(U+'/rest/v1/'+q,{headers:H});if(!r.ok)throw Error(await r.text());return r.json()};
- const host=document.getElementById('featured');
- if(host) host.innerHTML='';
+ const host=document.getElementById('featured'); if(host)host.innerHTML='';
  try{
   const [ps,cs,ims]=await Promise.all([
    get('products?select=*&order=id.desc'),
    get('categories?select=id,name,image_url&order=id.asc'),
    get('product_images?select=product_id,image_url,sort_order&order=sort_order.asc')
   ]);
-  const oldCats=[...window.categories];
-  const sl={'أساور':'bracelets','طقومة':'sets','حلاق':'earrings','حلق':'earrings','كفوف':'hand','خلاخيل':'anklets'};
-  const cm={};
-  cs.forEach(c=>{const old=oldCats.find(x=>x.name===c.name);cm[c.id]={id:old?.id||sl[c.name]||String(c.id),name:c.name,image:c.image_url||old?.image||''}});
-  const im={}; ims.forEach(x=>(im[x.product_id]??=[]).push(x.image_url));
-  const data=ps.map(p=>({
-    id:p.id,name:p.name||'',weight:String(p.weight||''),code:p.code||'',description:p.description||'',
-    featured:!!p.featured,cat:cm[p.category_id]?.id||String(p.category_id||''),
-    categoryName:cm[p.category_id]?.name||'',images:im[p.id]||[],image:(im[p.id]||[])[0]||'',_supabase:true
-  }));
+  const old=[...window.categories], sl={'أساور':'bracelets','طقومة':'sets','حلاق':'earrings','حلق':'earrings','كفوف':'hand','خلاخيل':'anklets'}, cm={};
+  cs.forEach(c=>{const o=old.find(x=>x.name===c.name);cm[c.id]={id:o?.id||sl[c.name]||String(c.id),name:c.name,image:c.image_url||o?.image||window.art(c.name,1)}});
+  const im={};ims.forEach(x=>(im[x.product_id]??=[]).push(x.image_url));
+  const data=ps.map(p=>({id:p.id,name:p.name||'',weight:String(p.weight||''),code:p.code||'',description:p.description||'',featured:!!p.featured,cat:cm[p.category_id]?.id||String(p.category_id||''),categoryName:cm[p.category_id]?.name||'',images:im[p.id]||[],image:(im[p.id]||[])[0]||'',_supabase:true}));
   window.products.splice(0,window.products.length,...data);
-  if(cs.length)window.categories.splice(0,window.categories.length,...cs.map(c=>({id:cm[c.id].id,name:c.name,image:cm[c.id].image||window.art(c.name,1)})));
+  window.categories.splice(0,window.categories.length,...cs.map(c=>({id:cm[c.id].id,name:c.name,image:cm[c.id].image})));
   window.alNajmaProductImage=(p,i=1)=>p?.images?.[0]||p?.image||window.art(p?.categoryName||'',i);
-
   const cats=document.getElementById('cats');
   if(cats)cats.innerHTML=window.categories.map(c=>`<a class="card luxury-cat" href="#/category/${c.id}" data-category-id="${c.id}"><div class="cat-photo"><img src="${c.image}" alt="${c.name}"><span class="cat-glow"></span></div><div class="cat-label"><h3>${c.name}</h3><small>اكتشف المجموعة</small></div></a>`).join('');
-
-  if(typeof renderSections==='function')renderSections();
-  if(typeof renderFeaturedPage==='function')renderFeaturedPage();
-
-  if(host){
-    const f=data.filter(p=>p.featured);
-    const list=(f.length?f:data).slice(0,6);
-    host.innerHTML=list.map((p,i)=>window.productCard(p,i)).join('');
-  }
-  window.dispatchEvent(new Event('hashchange'));
- }catch(e){
-  console.error('Supabase load failed',e);
-  if(host)host.innerHTML='<div class="empty-state"><strong>تعذر تحميل القطع</strong><span>أعد تحميل الصفحة.</span></div>';
- }
+  window.renderSections?.();
+  window.renderFeaturedPage?.();
+  if(host){const f=data.filter(p=>p.featured),list=(f.length?f:data).slice(0,6);host.innerHTML=list.map((p,i)=>window.productCard(p,i)).join('')}
+  window.alNajmaRoute?.();
+ }catch(e){console.error(e);if(host)host.innerHTML='<div class="empty-state"><strong>تعذر تحميل القطع</strong><span>أعد تحميل الصفحة.</span></div>'}
 })();
 </script>
 
