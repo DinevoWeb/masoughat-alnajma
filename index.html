@@ -580,6 +580,8 @@ const products=[
 ];
 const cname=id=>(categories.find(c=>c.id===id)||{}).name||'';
 function productCard(p,i=0){return `<a class="product" href="#/product/${p.id}" data-product-id="${p.id}"><img src="${(window.alNajmaProductImage&&window.alNajmaProductImage(p,i+1))||art(cname(p.cat),i+1)}" alt="${p.name}"><div class="pinfo"><h3>${p.name}</h3><span class="pill">الوزن: ${p.weight}</span></div></a>`}
+
+window.products=products;window.categories=categories;window.productCard=productCard;window.art=art;
 </script>
 <script>
 cats.innerHTML=categories.map((c,i)=>`<a class="card luxury-cat" href="#/category/${c.id}" data-category-id="${c.id}"><div class="cat-photo"><img src="${c.image}" alt="${c.name}"><span class="cat-glow"></span></div><div class="cat-label"><h3>${c.name}</h3><small>اكتشف المجموعة</small></div></a>`).join('');
@@ -912,4 +914,34 @@ featured.innerHTML=products.slice().reverse().slice(0,6).map(productCard).join('
   </div>
   <div class="global-footer-copy">© <span id="globalFooterYear"></span> مصوغات النجمة</div>
 </footer>
+
+<script>
+/* AL NAJMA V30 — Supabase relational catalog */
+(async()=>{
+ const U='https://zlexolhjqdbdhdduglox.supabase.co',K='sb_publishable_O93NmDuscyE6OqUKd9epOw_nCMuYrYW';
+ const H={apikey:K,Authorization:'Bearer '+K};
+ const get=async q=>{const r=await fetch(U+'/rest/v1/'+q,{headers:H});if(!r.ok)throw Error(await r.text());return r.json()};
+ try{
+  const [ps,cs,ims]=await Promise.all([
+   get('products?select=*&order=id.asc'),
+   get('categories?select=id,name,image_url&order=id.asc'),
+   get('product_images?select=product_id,image_url,sort_order&order=sort_order.asc')
+  ]);
+  if(!ps.length)return;
+  const old=[...window.categories], sl={'أساور':'bracelets','طقومة':'sets','حلاق':'earrings','حلق':'earrings','كفوف':'hand','خلاخيل':'anklets'}, cm={};
+  cs.forEach(c=>{const o=old.find(x=>x.name===c.name);cm[c.id]={id:o?.id||sl[c.name]||String(c.id),name:c.name,image:c.image_url||o?.image||''}});
+  const im={};ims.forEach(x=>(im[x.product_id]??=[]).push(x.image_url));
+  const mapped=ps.map(p=>({id:p.id,name:p.name||'',weight:p.weight||'',code:p.code||'',description:p.description||'',featured:!!p.featured,cat:cm[p.category_id]?.id||String(p.category_id||''),categoryName:cm[p.category_id]?.name||'',images:im[p.id]||[]}));
+  window.products.splice(0,window.products.length,...mapped);
+  if(cs.length)window.categories.splice(0,window.categories.length,...cs.map(c=>({id:cm[c.id].id,name:c.name,image:cm[c.id].image||window.art(c.name,1)})));
+  window.alNajmaProductImage=(p,n=1)=>p?.images?.[n-1]||p?.images?.[0]||window.art(p?.categoryName||p?.name||'مصوغات النجمة',n);
+  const ce=document.getElementById('cats');
+  if(ce)ce.innerHTML=window.categories.map(c=>`<a class="card luxury-cat" href="#/category/${c.id}" data-category-id="${c.id}"><div class="cat-photo"><img src="${c.image}" alt="${c.name}"><span class="cat-glow"></span></div><div class="cat-label"><h3>${c.name}</h3><small>اكتشف المجموعة</small></div></a>`).join('');
+  const fe=document.getElementById('featured');
+  if(fe){const fp=mapped.filter(p=>p.featured), rows=fp.length?fp:mapped.slice().reverse().slice(0,6);fe.innerHTML=rows.map(window.productCard).join('')}
+  window.dispatchEvent(new HashChangeEvent('hashchange'));
+ }catch(e){console.error('AL NAJMA Supabase:',e)}
+})();
+</script>
+
 </body></html>
