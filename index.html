@@ -726,7 +726,7 @@ featured.innerHTML=products.slice().reverse().slice(0,6).map(productCard).join('
     const p=products.find(x=>String(x.id)===String(id));
     if(!p) return false;
     const c=categories.find(x=>x.id===p.cat);
-    const photos=[art(cname(p.cat),Number(p.id||1)+1), c?c.image:art(cname(p.cat),2), art(p.name,Number(p.id||1)+5)];
+    const photos=(Array.isArray(p.images)&&p.images.length) ? p.images : [art(cname(p.cat),Number(p.id||1)+1), c?c.image:art(cname(p.cat),2), art(p.name,Number(p.id||1)+5)];
     const msg=encodeURIComponent(`مرحباً، أريد الاستفسار عن ${p.name} - الكود: ${p.code} - الوزن: ${p.weight}`);
     const waHref=CONTACT.whatsapp ? `https://wa.me/${CONTACT.whatsapp}?text=${msg}` : `https://wa.me/?text=${msg}`;
     $('productDetail').innerHTML=`
