@@ -63,7 +63,20 @@ function goHome(){currentCategory=null;show('dashboard');renderDashboard()}funct
 function openCategory(id){currentCategory=Number(id);const c=categories.find(x=>x.id==id);if(!c)return;$('catTitle').textContent=c.name;const list=products.filter(p=>p.category_id==id);$('categoryProducts').innerHTML=list.length?list.map(p=>`<div class="card product" onclick="editProduct(${p.id})">${firstImage(p.id)?`<img src="${esc(firstImage(p.id))}">`:'<div class="empty">بدون صورة</div>'}<div><b>${esc(p.name)}</b><small>${esc(p.code||'')} · ${esc(p.weight||'')}</small></div></div>`).join(''):'<div class="empty">ما في قطع بهذا القسم بعد</div>';show('categoryView')}
 function newCategory(){$('catId').value='';$('catName').value='';$('catImage').value='';$('catPreview').innerHTML='';$('catFormTitle').textContent='إضافة قسم جديد';$('deleteCatBtn').classList.add('hidden');msg('catMsg','');lastView=currentCategory?'categoryView':'dashboard';show('categoryForm')}
 function editCurrentCategory(){const c=categories.find(x=>x.id==currentCategory);$('catId').value=c.id;$('catName').value=c.name;$('catImage').value='';$('catPreview').innerHTML=c.image_url?`<img src="${esc(c.image_url)}" style="max-width:180px;border-radius:14px;margin-top:10px">`:'';$('catFormTitle').textContent='تعديل القسم';$('deleteCatBtn').classList.remove('hidden');show('categoryForm')}
-async function upload(file,path){const session=await syncToken();if(!session)throw Error('انتهت جلسة الدخول، سجّل دخول من جديد');const {error}=await sb.storage.from(BUCKET).upload(path,file,{contentType:file.type||'application/octet-stream',upsert:true});if(error)throw error;const {data}=sb.storage.from(BUCKET).getPublicUrl(path);return data.publicUrl}
+async function upload(file,path){
+ const {data:{session},error:sessionError}=await sb.auth.getSession();
+ if(sessionError)throw Error('تشخيص الجلسة: '+sessionError.message);
+ if(!session)throw Error('تشخيص الجلسة: لا توجد Session داخل لوحة الأدمن');
+ const {data:{user},error:userError}=await sb.auth.getUser();
+ if(userError||!user)throw Error('تشخيص المستخدم: '+(userError?.message||'لا يوجد مستخدم'));
+ let jwtRole='غير معروف';
+ try{jwtRole=JSON.parse(atob(session.access_token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/'))).role||'غير موجود'}catch(e){}
+ msg('catMsg','فحص الدخول ✅ | User: '+user.id.slice(0,8)+'… | JWT role: '+jwtRole+' | جاري رفع الصورة...');
+ const {error}=await sb.storage.from(BUCKET).upload(path,file,{contentType:file.type||'application/octet-stream',upsert:false});
+ if(error)throw Error('فشل Storage | JWT role: '+jwtRole+' | '+error.message);
+ const {data}=sb.storage.from(BUCKET).getPublicUrl(path);
+ return data.publicUrl;
+}
 async function saveCategory(){try{msg('catMsg','جاري الحفظ...');let id=$('catId').value,name=$('catName').value.trim();if(!name)throw Error('اكتب اسم القسم');let image_url=categories.find(x=>x.id==id)?.image_url||null;const f=$('catImage').files[0];if(f){const ext=(f.name.split('.').pop()||'jpg').replace(/[^a-zA-Z0-9]/g,'');image_url=await upload(f,'categories/'+Date.now()+'-category.'+ext);}let q;if(id){q=sb.from('categories').update({name,image_url}).eq('id',Number(id)).select('id,name,image_url').single()}else{q=sb.from('categories').insert({name,image_url}).select('id,name,image_url').single()}const {data,error}=await q;if(error)throw Error('فشل حفظ القسم: '+error.message);await loadAll();msg('catMsg','تم حفظ القسم والصورة ✅');setTimeout(goHome,500)}catch(e){msg('catMsg',e.message,true)}}
 async function deleteCategory(){const id=Number($('catId').value),n=products.filter(p=>p.category_id==id).length;if(n){alert('هذا القسم يحتوي '+n+' قطعة. انقل أو احذف القطع أولاً.');return}if(!confirm('حذف القسم نهائياً؟'))return;try{await api('/rest/v1/categories?id=eq.'+id,{method:'DELETE'});currentCategory=null;await loadAll();goHome()}catch(e){msg('catMsg',e.message,true)}}
 function newProduct(cat=null){$('productId').value='';$('pName').value='';$('pWeight').value='';$('pCode').value='';$('pDescription').value='';$('pFeatured').checked=false;$('pImages').value='';$('currentImages').innerHTML='';$('productFormTitle').textContent='إضافة قطعة';$('deleteProductBtn').classList.add('hidden');fillCategories();if(cat)$('pCategory').value=cat;msg('productMsg','');show('productForm')}
