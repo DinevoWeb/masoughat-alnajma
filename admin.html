@@ -1,165 +1,76 @@
-<!doctype html>
-<html lang="ar" dir="rtl">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>إدارة مصوغات النجمة</title>
-<style>
-:root{--cream:#f8f4eb;--paper:#fffdfa;--gold:#b58a2c;--gold2:#d7bb72;--ink:#1d1912;--muted:#776e60;--line:#eadcb8;--danger:#9d3434}
-*{box-sizing:border-box}body{margin:0;background:var(--cream);color:var(--ink);font-family:Tahoma,Arial,sans-serif}
-.wrap{max-width:920px;margin:auto;padding:22px}.card{background:var(--paper);border:1px solid var(--line);border-radius:22px;padding:20px;margin:16px 0;box-shadow:0 10px 35px rgba(82,61,14,.06)}
-h1,h2{margin-top:0}.muted{color:var(--muted);line-height:1.8}.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-label{display:block;font-weight:bold;margin:10px 0 6px}input,select,textarea,button{width:100%;font:inherit;border-radius:13px;padding:12px;border:1px solid var(--line);background:#fff}
-textarea{min-height:90px;resize:vertical}button{cursor:pointer;background:var(--gold);color:white;font-weight:bold;border:none;margin-top:12px}
-button.secondary{background:#eee7d7;color:var(--ink)}button.danger{background:var(--danger)}
-.hidden{display:none!important}.top{display:flex;align-items:center;justify-content:space-between;gap:12px}.top button{width:auto;margin:0}
-.msg{margin-top:12px;padding:10px;border-radius:12px;background:#f4ecd9;line-height:1.6}
-.product{display:grid;grid-template-columns:76px 1fr auto;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}
-.product img{width:76px;height:76px;object-fit:cover;border-radius:12px;background:#eee}.actions{display:flex;gap:7px}.actions button{width:auto;padding:9px 11px;margin:0}
-@media(max-width:650px){.grid{grid-template-columns:1fr}.product{grid-template-columns:60px 1fr}.product img{width:60px;height:60px}.actions{grid-column:1/-1}.actions button{flex:1}}
-</style>
-</head>
-<body>
+<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>لوحة إدارة مصوغات النجمة</title><style>
+:root{--bg:#f7f1e7;--paper:#fffdf9;--gold:#b58a2c;--gold2:#d9c28a;--ink:#17140f;--muted:#81796d;--line:rgba(181,138,44,.25);--danger:#a33b3b;--ok:#2d7550}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:Tahoma,Arial,sans-serif}button,input,select,textarea{font:inherit}.wrap{max-width:980px;margin:auto;padding:16px}.hidden{display:none!important}
+header{position:sticky;top:0;z-index:20;background:rgba(255,253,249,.96);border-bottom:1px solid var(--line);backdrop-filter:blur(12px)}.head{max-width:980px;margin:auto;padding:12px 16px;display:flex;align-items:center;gap:10px}.brand{flex:1}.brand b{display:block;font-size:20px}.brand small{color:var(--gold)}.head button{width:auto;margin:0}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:20px;padding:16px;box-shadow:0 8px 24px rgba(49,38,16,.055);margin:14px 0}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.stat{text-align:center}.stat b{font-size:24px;display:block;color:var(--gold)}.stat small{color:var(--muted)}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:14px 0}.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.cats{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.cat{padding:0;overflow:hidden;cursor:pointer}.cat img{width:100%;aspect-ratio:1.45/1;object-fit:cover;background:#eee5d3}.cat-body{padding:13px}.cat-body b{display:block;font-size:18px}.cat-body small{color:var(--muted)}
+.products{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.product{padding:0;overflow:hidden;cursor:pointer}.product img{width:100%;aspect-ratio:1/1;object-fit:cover;background:#eee5d3}.product div{padding:10px}.product b{font-size:14px;display:block}.product small{color:var(--muted)}
+label{display:block;font-weight:bold;margin:10px 0 6px}input,select,textarea{width:100%;border:1px solid var(--line);border-radius:13px;padding:12px;background:#fff}textarea{min-height:90px}
+button{border:0;border-radius:13px;padding:12px;background:var(--gold);color:#fff;font-weight:bold;cursor:pointer}button.secondary{background:#eee6d5;color:var(--ink)}button.danger{background:var(--danger)}button.ghost{background:transparent;color:var(--gold);border:1px solid var(--line)}
+.row{display:flex;gap:8px;align-items:center}.row>*{flex:1}.title{display:flex;align-items:center;gap:10px}.title h2{flex:1;margin:0}.msg{padding:10px;border-radius:12px;margin:10px 0;background:#f0e8d6;color:#70571f}.error{background:#f8dddd;color:#842b2b}
+.images{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.image-item{position:relative;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:#fff;touch-action:none}.image-item img{width:100%;aspect-ratio:1/1;object-fit:cover;display:block}.image-item .bar{display:flex;gap:4px;padding:5px}.image-item button{padding:7px;font-size:11px}.image-item.dragging{opacity:.45}.main-badge{position:absolute;top:6px;right:6px;background:var(--gold);color:#fff;border-radius:999px;padding:4px 7px;font-size:9px}
+.login{max-width:430px;margin:8vh auto}.empty{text-align:center;color:var(--muted);padding:28px 10px}
+@media(min-width:700px){.cats{grid-template-columns:repeat(3,1fr)}.products{grid-template-columns:repeat(4,1fr)}}@media(max-width:520px){.grid{grid-template-columns:1fr}}
+</style></head><body>
+<header id="appHeader" class="hidden"><div class="head"><div class="brand"><b>مصوغات النجمة</b><small>لوحة التحكم</small></div><button class="ghost" onclick="goHome()">الرئيسية</button><button class="secondary" onclick="logout()">خروج</button></div></header>
 <div class="wrap">
-  <section id="loginCard" class="card">
-    <h1>مصوغات النجمة</h1>
-    <p class="muted">لوحة الإدارة — سجّل الدخول بحساب الأدمن الذي أنشأته في Supabase.</p>
-    <label>البريد الإلكتروني</label><input id="email" type="email" autocomplete="username">
-    <label>كلمة السر</label><input id="password" type="password" autocomplete="current-password">
-    <button id="loginBtn">دخول</button>
-    <div id="loginMsg" class="msg hidden"></div>
-  </section>
+<section id="login" class="login card"><h1>دخول الإدارة</h1><p style="color:var(--muted)">AL NAJMA JEWELLERY</p><label>البريد الإلكتروني</label><input id="email" type="email"><label>كلمة المرور</label><input id="password" type="password"><button onclick="login()">دخول</button><div id="loginMsg"></div></section>
 
-  <main id="admin" class="hidden">
-    <div class="top"><h1>لوحة الإدارة 💎</h1><button id="logoutBtn" class="secondary">تسجيل خروج</button></div>
-    <section class="card">
-      <h2 id="formTitle">إضافة منتج</h2>
-      <input id="editId" type="hidden">
-      <div class="grid">
-        <div><label>اسم المنتج</label><input id="name"></div>
-        <div><label>الوزن</label><input id="weight" placeholder="مثال: 12.5 غرام"></div>
-        <div><label>القسم</label><select id="category"></select></div>
-        <div><label>قطعة مميزة؟</label><select id="featured"><option value="false">لا</option><option value="true">نعم</option></select></div>
-      </div>
-      <label>الوصف</label><textarea id="description"></textarea>
-      <label>صور المنتج</label><input id="images" type="file" accept="image/*" multiple>
-      <button id="saveBtn">حفظ المنتج</button>
-      <button id="cancelBtn" class="secondary hidden">إلغاء التعديل</button>
-      <div id="formMsg" class="msg hidden"></div>
-    </section>
+<main id="app" class="hidden">
+<section id="dashboard">
+ <div class="stats"><div class="card stat"><b id="sCats">0</b><small>الأقسام</small></div><div class="card stat"><b id="sProducts">0</b><small>القطع</small></div><div class="card stat"><b id="sFeatured">0</b><small>المميزة</small></div></div>
+ <div class="actions"><button onclick="newCategory()">＋ إضافة قسم</button><button onclick="newProduct()">＋ إضافة قطعة</button></div>
+ <div class="title"><h2>الأقسام</h2><button class="ghost" onclick="loadAll()">تحديث</button></div><div id="categories" class="cats"></div>
+</section>
 
-    <section class="card">
-      <h2>المنتجات</h2>
-      <div id="products"><p class="muted">جاري التحميل...</p></div>
-    </section>
-  </main>
-</div>
+<section id="categoryView" class="hidden">
+ <div class="title"><button class="ghost" onclick="show('dashboard')">← رجوع</button><h2 id="catTitle"></h2><button class="secondary" onclick="editCurrentCategory()">تعديل القسم</button></div>
+ <button onclick="newProduct(currentCategory)">＋ إضافة قطعة لهذا القسم</button><div id="categoryProducts" class="products" style="margin-top:14px"></div>
+</section>
 
+<section id="categoryForm" class="hidden card"><div class="title"><button class="ghost" onclick="goBack()">← رجوع</button><h2 id="catFormTitle">إضافة قسم</h2></div>
+ <input id="catId" type="hidden"><label>اسم القسم</label><input id="catName" placeholder="مثال: خواتم"><label>صورة غلاف القسم</label><input id="catImage" type="file" accept="image/*">
+ <div id="catPreview"></div><button onclick="saveCategory()">حفظ القسم</button><button id="deleteCatBtn" class="danger hidden" onclick="deleteCategory()">حذف القسم</button><div id="catMsg"></div>
+</section>
+
+<section id="productForm" class="hidden card"><div class="title"><button class="ghost" onclick="goBack()">← رجوع</button><h2 id="productFormTitle">إضافة قطعة</h2></div>
+ <input id="productId" type="hidden"><div class="grid"><div><label>اسم القطعة</label><input id="pName"></div><div><label>الوزن</label><input id="pWeight"></div><div><label>الكود</label><input id="pCode" placeholder="اتركه فارغاً للتوليد التلقائي"></div><div><label>القسم</label><select id="pCategory"></select></div></div>
+ <label><input id="pFeatured" type="checkbox" style="width:auto"> قطعة مميزة</label><label>الوصف</label><textarea id="pDescription"></textarea>
+ <h3>الصور الحالية</h3><p style="color:var(--muted);font-size:12px">اسحب الصور لتغيير الترتيب. أول صورة هي الصورة الرئيسية.</p><div id="currentImages" class="images"></div>
+ <label>إضافة صور جديدة</label><input id="pImages" type="file" accept="image/*" multiple>
+ <button onclick="saveProduct()">حفظ القطعة</button><button id="deleteProductBtn" class="danger hidden" onclick="deleteProduct()">حذف القطعة</button><div id="productMsg"></div>
+</section>
+</main></div>
 <script>
-const SUPABASE_URL='https://zlexolhjqdbdhdduglox.supabase.co';
-const KEY='sb_publishable_O93NmDuscyE6OqUKd9epOw_nCMuYrYW';
-let token='', categories=[], products=[];
-
-const $=id=>document.getElementById(id);
-function msg(id,text){$(id).textContent=text;$(id).classList.remove('hidden')}
-function clearMsg(id){$(id).classList.add('hidden')}
-async function api(path,opt={}){
-  const headers={apikey:KEY,Authorization:'Bearer '+(token||KEY),...(opt.headers||{})};
-  const r=await fetch(SUPABASE_URL+path,{...opt,headers});
-  if(!r.ok) throw new Error(await r.text() || ('HTTP '+r.status));
-  const t=await r.text(); return t?JSON.parse(t):null;
-}
-async function login(){
-  clearMsg('loginMsg');
-  try{
-    const r=await fetch(SUPABASE_URL+'/auth/v1/token?grant_type=password',{method:'POST',headers:{apikey:KEY,'Content-Type':'application/json'},body:JSON.stringify({email:$('email').value.trim(),password:$('password').value})});
-    const d=await r.json(); if(!r.ok) throw new Error(d.error_description||d.msg||'فشل تسجيل الدخول');
-    token=d.access_token; sessionStorage.setItem('najma_token',token); await start();
-  }catch(e){msg('loginMsg','تعذر الدخول: '+e.message)}
-}
-async function start(){
-  $('loginCard').classList.add('hidden');$('admin').classList.remove('hidden');
-  try{await loadCategories();await loadProducts()}catch(e){msg('formMsg','تعذر تحميل البيانات: '+e.message)}
-}
-async function loadCategories(){
-  categories=await api('/rest/v1/categories?select=id,name&order=id');
-  $('category').innerHTML=categories.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('');
-}
-async function loadProducts(){
-  products=await api('/rest/v1/products?select=*&order=id.desc');
-  const imgs=await api('/rest/v1/product_images?select=product_id,image_url,sort_order&order=sort_order');
-  const first={}; (imgs||[]).forEach(i=>{if(!first[i.product_id])first[i.product_id]=i.image_url});
-  $('products').innerHTML=products.length?products.map(p=>`<div class="product">
-    ${first[p.id]?`<img src="${esc(first[p.id])}" alt="">`:'<div></div>'}
-    <div><b>${esc(p.name||'بدون اسم')}</b><div class="muted">${esc(p.weight||'')} ${p.code?' • '+esc(p.code):''}</div></div>
-    <div class="actions"><button onclick="editProduct(${p.id})">تعديل</button><button class="danger" onclick="deleteProduct(${p.id})">حذف</button></div>
-  </div>`).join(''):'<p class="muted">لا توجد منتجات بعد.</p>';
-}
-async function uploadImages(productId,files){
-  let n=0;
-  for(const file of files){
-    n++;
-    const ext=(file.name.split('.').pop()||'jpg').replace(/[^a-zA-Z0-9]/g,'').toLowerCase() || 'jpg';
-    const objectPath=productId+'/'+Date.now()+'-'+n+'.'+ext;
-    const r=await fetch(SUPABASE_URL+'/storage/v1/object/product-images/'+objectPath,{
-      method:'POST',
-      headers:{
-        apikey:KEY,
-        Authorization:'Bearer '+token,
-        'Content-Type':file.type||'application/octet-stream',
-        'x-upsert':'true'
-      },
-      body:file
-    });
-    if(!r.ok) throw new Error('فشل رفع الصورة: '+await r.text());
-
-    const publicUrl=SUPABASE_URL+'/storage/v1/object/public/product-images/'+objectPath;
-    await api('/rest/v1/product_images',{
-      method:'POST',
-      headers:{'Content-Type':'application/json',Prefer:'return=minimal'},
-      body:JSON.stringify({product_id:Number(productId),image_url:publicUrl,sort_order:n})
-    });
-  }
-}
-async function saveProduct(){
-  clearMsg('formMsg'); $('saveBtn').disabled=true;
-  try{
-    const body={name:$('name').value.trim(),weight:$('weight').value.trim()||null,description:$('description').value.trim()||null,category_id:Number($('category').value),featured:$('featured').value==='true'};
-    if(!body.name) throw new Error('اكتب اسم المنتج');
-    const id=$('editId').value;
-    if(id){
-      await api('/rest/v1/products?id=eq.'+id,{method:'PATCH',headers:{'Content-Type':'application/json',Prefer:'return=minimal'},body:JSON.stringify(body)});
-      if($('images').files.length) await uploadImages(Number(id),$('images').files);
-      msg('formMsg','تم تعديل المنتج ✅');
-    }else{
-      const rows=await api('/rest/v1/products',{method:'POST',headers:{'Content-Type':'application/json',Prefer:'return=representation'},body:JSON.stringify(body)});
-      const p=rows&&rows[0]; if(!p) throw new Error('تم الحفظ لكن لم يرجع رقم المنتج');
-      if($('images').files.length) await uploadImages(p.id,$('images').files);
-      msg('formMsg',$('images').files.length ? 'تمت إضافة المنتج ورفع الصور بنجاح ✅' : 'تمت إضافة المنتج بدون صور ✅');
-    }
-    resetForm(); await loadProducts();
-  }catch(e){msg('formMsg','تعذر الحفظ: '+e.message)}
-  finally{$('saveBtn').disabled=false}
-}
-function editProduct(id){
-  const p=products.find(x=>x.id===id); if(!p)return;
-  $('editId').value=p.id;$('name').value=p.name||'';$('weight').value=p.weight||'';$('description').value=p.description||'';$('category').value=p.category_id||'';$('featured').value=String(!!p.featured);
-  $('formTitle').textContent='تعديل المنتج';$('cancelBtn').classList.remove('hidden');window.scrollTo({top:0,behavior:'smooth'});
-}
-function resetForm(){
-  $('editId').value='';$('name').value='';$('weight').value='';$('description').value='';$('featured').value='false';$('images').value='';$('formTitle').textContent='إضافة منتج';$('cancelBtn').classList.add('hidden');
-}
-async function deleteProduct(id){
-  if(!confirm('حذف هذا المنتج؟'))return;
-  try{
-    await api('/rest/v1/product_images?product_id=eq.'+id,{method:'DELETE',headers:{Prefer:'return=minimal'}});
-    await api('/rest/v1/products?id=eq.'+id,{method:'DELETE',headers:{Prefer:'return=minimal'}});
-    await loadProducts();
-  }catch(e){alert('تعذر الحذف: '+e.message)}
-}
-function esc(v){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
-$('loginBtn').onclick=login;$('saveBtn').onclick=saveProduct;$('cancelBtn').onclick=resetForm;
-$('logoutBtn').onclick=()=>{sessionStorage.removeItem('najma_token');location.reload()};
-token=sessionStorage.getItem('najma_token')||''; if(token) start();
-</script>
-</body></html>
+const U='https://zlexolhjqdbdhdduglox.supabase.co',K='sb_publishable_O93NmDuscyE6OqUKd9epOw_nCMuYrYW',BUCKET='product-images';
+let token=sessionStorage.getItem('najma_token')||'',categories=[],products=[],images=[],currentCategory=null,lastView='dashboard',dragId=null;
+const $=id=>document.getElementById(id), esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+function msg(id,t,e=false){$(id).innerHTML=t?`<div class="msg ${e?'error':''}">${esc(t)}</div>`:''}
+async function api(path,opt={}){opt.headers={apikey:K,Authorization:'Bearer '+(token||K),...(opt.headers||{})};const r=await fetch(U+path,opt);if(!r.ok)throw Error(await r.text());if(r.status===204)return null;const txt=await r.text();return txt?JSON.parse(txt):null}
+async function login(){try{msg('loginMsg','');const r=await fetch(U+'/auth/v1/token?grant_type=password',{method:'POST',headers:{apikey:K,'Content-Type':'application/json'},body:JSON.stringify({email:$('email').value.trim(),password:$('password').value})});if(!r.ok)throw Error('بيانات الدخول غير صحيحة');const d=await r.json();token=d.access_token;sessionStorage.setItem('najma_token',token);start()}catch(e){msg('loginMsg',e.message,true)}}
+function logout(){sessionStorage.removeItem('najma_token');location.reload()}
+async function start(){try{await api('/auth/v1/user');$('login').classList.add('hidden');$('app').classList.remove('hidden');$('appHeader').classList.remove('hidden');await loadAll()}catch(e){sessionStorage.removeItem('najma_token');token='';$('login').classList.remove('hidden')}}
+async function loadAll(){try{[categories,products,images]=await Promise.all([api('/rest/v1/categories?select=*&order=id.asc'),api('/rest/v1/products?select=*&order=id.desc'),api('/rest/v1/product_images?select=*&order=sort_order.asc')]);renderDashboard();fillCategories();if(currentCategory&&$('categoryView').classList.contains('hidden')===false)openCategory(currentCategory)}catch(e){alert('تعذر تحميل البيانات: '+e.message)}}
+function firstImage(id){return images.find(x=>x.product_id==id)?.image_url||''}
+function renderDashboard(){$('sCats').textContent=categories.length;$('sProducts').textContent=products.length;$('sFeatured').textContent=products.filter(x=>x.featured).length;$('categories').innerHTML=categories.length?categories.map(c=>{const n=products.filter(p=>p.category_id==c.id).length;return `<div class="card cat" onclick="openCategory(${c.id})">${c.image_url?`<img src="${esc(c.image_url)}">`:`<div class="empty">لا توجد صورة</div>`}<div class="cat-body"><b>${esc(c.name)}</b><small>${n} قطعة</small></div></div>`}).join(''):'<div class="empty">لا توجد أقسام بعد</div>'}
+function fillCategories(){ $('pCategory').innerHTML=categories.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('') }
+function show(id){['dashboard','categoryView','categoryForm','productForm'].forEach(x=>$(x).classList.toggle('hidden',x!==id));window.scrollTo(0,0)}
+function goHome(){currentCategory=null;show('dashboard');renderDashboard()}function goBack(){currentCategory?openCategory(currentCategory):goHome()}
+function openCategory(id){currentCategory=Number(id);const c=categories.find(x=>x.id==id);if(!c)return;$('catTitle').textContent=c.name;const list=products.filter(p=>p.category_id==id);$('categoryProducts').innerHTML=list.length?list.map(p=>`<div class="card product" onclick="editProduct(${p.id})">${firstImage(p.id)?`<img src="${esc(firstImage(p.id))}">`:'<div class="empty">بدون صورة</div>'}<div><b>${esc(p.name)}</b><small>${esc(p.code||'')} · ${esc(p.weight||'')}</small></div></div>`).join(''):'<div class="empty">ما في قطع بهذا القسم بعد</div>';show('categoryView')}
+function newCategory(){$('catId').value='';$('catName').value='';$('catImage').value='';$('catPreview').innerHTML='';$('catFormTitle').textContent='إضافة قسم جديد';$('deleteCatBtn').classList.add('hidden');msg('catMsg','');lastView=currentCategory?'categoryView':'dashboard';show('categoryForm')}
+function editCurrentCategory(){const c=categories.find(x=>x.id==currentCategory);$('catId').value=c.id;$('catName').value=c.name;$('catImage').value='';$('catPreview').innerHTML=c.image_url?`<img src="${esc(c.image_url)}" style="max-width:180px;border-radius:14px;margin-top:10px">`:'';$('catFormTitle').textContent='تعديل القسم';$('deleteCatBtn').classList.remove('hidden');show('categoryForm')}
+async function upload(file,path){const r=await fetch(U+'/storage/v1/object/'+BUCKET+'/'+path,{method:'POST',headers:{apikey:K,Authorization:'Bearer '+token,'Content-Type':file.type||'application/octet-stream','x-upsert':'true'},body:file});if(!r.ok)throw Error(await r.text());return U+'/storage/v1/object/public/'+BUCKET+'/'+path}
+async function saveCategory(){try{msg('catMsg','جاري الحفظ...');let id=$('catId').value,name=$('catName').value.trim();if(!name)throw Error('اكتب اسم القسم');let image_url=categories.find(x=>x.id==id)?.image_url||null;const f=$('catImage').files[0];if(f)image_url=await upload(f,'categories/'+Date.now()+'.'+(f.name.split('.').pop()||'jpg'));if(id){await api('/rest/v1/categories?id=eq.'+id,{method:'PATCH',headers:{'Content-Type':'application/json',Prefer:'return=minimal'},body:JSON.stringify({name,image_url})})}else{await api('/rest/v1/categories',{method:'POST',headers:{'Content-Type':'application/json',Prefer:'return=minimal'},body:JSON.stringify({name,image_url})})}await loadAll();msg('catMsg','تم الحفظ ✅');goHome()}catch(e){msg('catMsg',e.message,true)}}
+async function deleteCategory(){const id=Number($('catId').value),n=products.filter(p=>p.category_id==id).length;if(n){alert('هذا القسم يحتوي '+n+' قطعة. انقل أو احذف القطع أولاً.');return}if(!confirm('حذف القسم نهائياً؟'))return;try{await api('/rest/v1/categories?id=eq.'+id,{method:'DELETE'});currentCategory=null;await loadAll();goHome()}catch(e){msg('catMsg',e.message,true)}}
+function newProduct(cat=null){$('productId').value='';$('pName').value='';$('pWeight').value='';$('pCode').value='';$('pDescription').value='';$('pFeatured').checked=false;$('pImages').value='';$('currentImages').innerHTML='';$('productFormTitle').textContent='إضافة قطعة';$('deleteProductBtn').classList.add('hidden');fillCategories();if(cat)$('pCategory').value=cat;msg('productMsg','');show('productForm')}
+function editProduct(id){const p=products.find(x=>x.id==id);if(!p)return;currentCategory=p.category_id;$('productId').value=p.id;$('pName').value=p.name||'';$('pWeight').value=p.weight||'';$('pCode').value=p.code||'';$('pDescription').value=p.description||'';$('pFeatured').checked=!!p.featured;fillCategories();$('pCategory').value=p.category_id;$('productFormTitle').textContent='تعديل '+p.name;$('deleteProductBtn').classList.remove('hidden');$('pImages').value='';renderImages(id);msg('productMsg','');show('productForm')}
+function renderImages(pid){const list=images.filter(x=>x.product_id==pid).sort((a,b)=>(a.sort_order||0)-(b.sort_order||0));$('currentImages').innerHTML=list.map((x,i)=>`<div class="image-item" draggable="true" data-id="${x.id}" ondragstart="dragStart(event)" ondragover="event.preventDefault()" ondrop="dropImage(event)" ontouchstart="touchPick(${x.id})"><img src="${esc(x.image_url)}">${i===0?'<span class="main-badge">الرئيسية</span>':''}<div class="bar"><button class="danger" onclick="event.stopPropagation();deleteImage(${x.id})">حذف</button></div></div>`).join('')}
+function dragStart(e){dragId=Number(e.currentTarget.dataset.id)}async function dropImage(e){e.preventDefault();const to=Number(e.currentTarget.dataset.id);if(dragId&&to&&dragId!==to)await reorderImages(dragId,to)}function touchPick(id){dragId=id}
+async function reorderImages(from,to){const pid=Number($('productId').value),list=images.filter(x=>x.product_id==pid).sort((a,b)=>(a.sort_order||0)-(b.sort_order||0)),a=list.findIndex(x=>x.id==from),b=list.findIndex(x=>x.id==to);if(a<0||b<0)return;const [m]=list.splice(a,1);list.splice(b,0,m);try{for(let i=0;i<list.length;i++)await api('/rest/v1/product_images?id=eq.'+list[i].id,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({sort_order:i+1})});await loadAll();renderImages(pid)}catch(e){alert(e.message)}}
+async function deleteImage(id){if(!confirm('حذف هذه الصورة؟'))return;try{await api('/rest/v1/product_images?id=eq.'+id,{method:'DELETE'});await loadAll();renderImages(Number($('productId').value))}catch(e){alert(e.message)}}
+async function addImages(pid,files){let n=images.filter(x=>x.product_id==pid).length;for(const f of files){n++;const ext=(f.name.split('.').pop()||'jpg').replace(/[^a-zA-Z0-9]/g,'');const path=pid+'/'+Date.now()+'-'+n+'.'+ext,url=await upload(f,path);await api('/rest/v1/product_images',{method:'POST',headers:{'Content-Type':'application/json',Prefer:'return=minimal'},body:JSON.stringify({product_id:Number(pid),image_url:url,sort_order:n})})}}
+async function saveProduct(){try{msg('productMsg','جاري الحفظ ورفع الصور...');const id=$('productId').value;const data={name:$('pName').value.trim(),weight:$('pWeight').value.trim(),description:$('pDescription').value.trim(),featured:$('pFeatured').checked,category_id:Number($('pCategory').value)};if(!data.name)throw Error('اكتب اسم القطعة');if($('pCode').value.trim())data.code=$('pCode').value.trim();let pid;if(id){await api('/rest/v1/products?id=eq.'+id,{method:'PATCH',headers:{'Content-Type':'application/json',Prefer:'return=minimal'},body:JSON.stringify(data)});pid=Number(id)}else{const r=await api('/rest/v1/products',{method:'POST',headers:{'Content-Type':'application/json',Prefer:'return=representation'},body:JSON.stringify(data)});pid=r[0].id}await addImages(pid,[...$('pImages').files]);currentCategory=data.category_id;await loadAll();openCategory(currentCategory)}catch(e){msg('productMsg',e.message,true)}}
+async function deleteProduct(){const id=Number($('productId').value);if(!confirm('حذف القطعة وصورها من القائمة نهائياً؟'))return;try{await api('/rest/v1/product_images?product_id=eq.'+id,{method:'DELETE'});await api('/rest/v1/products?id=eq.'+id,{method:'DELETE'});await loadAll();openCategory(currentCategory)}catch(e){msg('productMsg',e.message,true)}}
+if(token)start();
+</script></body></html>
