@@ -568,16 +568,7 @@ function art(label,n=1){
  const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="800" height="800"><defs><radialGradient id="b"><stop stop-color="#fffdf8"/><stop offset="1" stop-color="#ead9ad"/></radialGradient></defs><rect width="100%" height="100%" fill="url(#b)"/><circle cx="${390+n*8}" cy="365" r="${125+n*4}" fill="none" stroke="#b58a2c" stroke-width="18"/><circle cx="${470-n*6}" cy="430" r="74" fill="none" stroke="#d7bb72" stroke-width="11"/><path d="M240 530 Q400 610 570 520" fill="none" stroke="#c39c43" stroke-width="10"/><text x="50%" y="89%" text-anchor="middle" font-family="Arial" font-size="38" fill="#6c5626">${label}</text></svg>`;
  return 'data:image/svg+xml;charset=UTF-8,'+encodeURIComponent(svg);
 }
-const products=[
- {id:1,name:'سوار النجمة',cat:'bracelets',weight:'18.6 غرام',code:'N-001'},
- {id:2,name:'طقم كلاسيكي',cat:'sets',weight:'42.3 غرام',code:'N-002'},
- {id:3,name:'حلق ذهبي ناعم',cat:'earrings',weight:'12.8 غرام',code:'N-003'},
- {id:4,name:'كف أنيق',cat:'hand',weight:'24.1 غرام',code:'N-004'},
- {id:5,name:'خلخال النجمة',cat:'anklets',weight:'15.4 غرام',code:'N-005'},
- {id:6,name:'سوار فاخر',cat:'bracelets',weight:'21.2 غرام',code:'N-006'},
- {id:7,name:'طقم مميز',cat:'sets',weight:'48.9 غرام',code:'N-007'},
- {id:8,name:'حلق كلاسيكي',cat:'earrings',weight:'10.5 غرام',code:'N-008'}
-];
+const products=[];
 const cname=id=>(categories.find(c=>c.id===id)||{}).name||'';
 function productCard(p,i=0){return `<a class="product" href="#/product/${p.id}" data-product-id="${p.id}"><img src="${(window.alNajmaProductImage&&window.alNajmaProductImage(p,i+1))||art(cname(p.cat),i+1)}" alt="${p.name}"><div class="pinfo"><h3>${p.name}</h3><span class="pill">الوزن: ${p.weight}</span></div></a>`}
 
@@ -585,7 +576,7 @@ window.products=products;window.categories=categories;window.productCard=product
 </script>
 <script>
 cats.innerHTML=categories.map((c,i)=>`<a class="card luxury-cat" href="#/category/${c.id}" data-category-id="${c.id}"><div class="cat-photo"><img src="${c.image}" alt="${c.name}"><span class="cat-glow"></span></div><div class="cat-label"><h3>${c.name}</h3><small>اكتشف المجموعة</small></div></a>`).join('');
-featured.innerHTML=products.slice().reverse().slice(0,6).map(productCard).join('');
+featured.innerHTML='';
 </script>
 <script>
 (() => {
@@ -726,7 +717,7 @@ featured.innerHTML=products.slice().reverse().slice(0,6).map(productCard).join('
     const p=products.find(x=>String(x.id)===String(id));
     if(!p) return false;
     const c=categories.find(x=>x.id===p.cat);
-    const photos=(Array.isArray(p.images)&&p.images.length) ? p.images : [art(cname(p.cat),Number(p.id||1)+1), c?c.image:art(cname(p.cat),2), art(p.name,Number(p.id||1)+5)];
+    const photos=(Array.isArray(p.images)&&p.images.length)?p.images:[art(cname(p.cat),1)];
     const msg=encodeURIComponent(`مرحباً، أريد الاستفسار عن ${p.name} - الكود: ${p.code} - الوزن: ${p.weight}`);
     const waHref=CONTACT.whatsapp ? `https://wa.me/${CONTACT.whatsapp}?text=${msg}` : `https://wa.me/?text=${msg}`;
     $('productDetail').innerHTML=`
@@ -864,46 +855,7 @@ featured.innerHTML=products.slice().reverse().slice(0,6).map(productCard).join('
 })();
 </script>
 
-<script>
-/* AL NAJMA - Supabase public products bridge */
-(()=>{
- const URL='https://zlexolhjqdbdhdduglox.supabase.co', KEY='sb_publishable_O93NmDuscyE6OqUKd9epOw_nCMuYrYW';
- const img=(p,i=1)=>(p&&(p.image||(Array.isArray(p.images)&&p.images[0])))||(typeof art==='function'?art(typeof cname==='function'?cname(p?.cat):'',i):'');
- window.alNajmaProductImage=img;
- const norm=(r,i)=>{
-   let a=r.images??r.photos??r.image_urls??[];
-   if(typeof a==='string') a=a.split(',').map(x=>x.trim()).filter(Boolean);
-   if(!Array.isArray(a)) a=[];
-   const one=r.image_url??r.image??r.photo??r.cover_image??'';
-   if(one&&!a.includes(one)) a.unshift(one);
-   let w=r.weight??r.weight_grams??'';
-   if(w!==''&&w!=null&&!String(w).includes('غرام')) w=String(w)+' غرام';
-   return {id:r.id??('db-'+i),name:r.name??r.title??'قطعة ذهبية',
-     cat:r.cat??r.category??r.category_id??'',weight:String(w??''),
-     code:r.code??r.sku??'',images:a,image:a[0]||'',
-     featured:r.featured??r.is_featured??false,_supabase:true};
- };
- async function load(){
-   try{
-     const res=await fetch(URL+'/rest/v1/products?select=*',{headers:{apikey:KEY,Authorization:'Bearer '+KEY,Accept:'application/json'}});
-     if(!res.ok) throw Error('HTTP '+res.status);
-     const rows=await res.json();
-     if(!Array.isArray(rows)||!rows.length){console.info('Supabase connected; products empty.');return;}
-     const data=rows.map(norm);
-     if(typeof products!=='undefined'&&Array.isArray(products)) products.splice(0,products.length,...data);
-     if(typeof productCard==='function'){
-       const h=document.getElementById('featured');
-       if(h){const f=data.filter(p=>p.featured), list=(f.length?f:data).slice(0,6);h.innerHTML=list.map((p,i)=>productCard(p,i)).join('');}
-     }
-     if(typeof renderSections==='function') renderSections();
-     if(typeof renderFeaturedPage==='function') renderFeaturedPage();
-     window.dispatchEvent(new Event('hashchange'));
-     console.info('Loaded '+data.length+' products from Supabase');
-   }catch(e){console.warn('Supabase unavailable; built-in products kept.',e);}
- }
- document.readyState==='loading'?document.addEventListener('DOMContentLoaded',load,{once:true}):load();
-})();
-</script>
+
 
 <footer class="global-luxury-footer" aria-label="مصوغات النجمة">
   <div class="global-footer-line"><span></span><i>✦</i><span></span></div>
@@ -916,31 +868,49 @@ featured.innerHTML=products.slice().reverse().slice(0,6).map(productCard).join('
 </footer>
 
 <script>
-/* AL NAJMA V30 — Supabase relational catalog */
+/* AL NAJMA V32 — Supabase is the single source of truth for products */
 (async()=>{
  const U='https://zlexolhjqdbdhdduglox.supabase.co',K='sb_publishable_O93NmDuscyE6OqUKd9epOw_nCMuYrYW';
- const H={apikey:K,Authorization:'Bearer '+K};
+ const H={apikey:K,Authorization:'Bearer '+K,Accept:'application/json'};
  const get=async q=>{const r=await fetch(U+'/rest/v1/'+q,{headers:H});if(!r.ok)throw Error(await r.text());return r.json()};
+ const host=document.getElementById('featured');
+ if(host) host.innerHTML='';
  try{
   const [ps,cs,ims]=await Promise.all([
-   get('products?select=*&order=id.asc'),
+   get('products?select=*&order=id.desc'),
    get('categories?select=id,name,image_url&order=id.asc'),
    get('product_images?select=product_id,image_url,sort_order&order=sort_order.asc')
   ]);
-  if(!ps.length)return;
-  const old=[...window.categories], sl={'أساور':'bracelets','طقومة':'sets','حلاق':'earrings','حلق':'earrings','كفوف':'hand','خلاخيل':'anklets'}, cm={};
-  cs.forEach(c=>{const o=old.find(x=>x.name===c.name);cm[c.id]={id:o?.id||sl[c.name]||String(c.id),name:c.name,image:c.image_url||o?.image||''}});
-  const im={};ims.forEach(x=>(im[x.product_id]??=[]).push(x.image_url));
-  const mapped=ps.map(p=>({id:p.id,name:p.name||'',weight:p.weight||'',code:p.code||'',description:p.description||'',featured:!!p.featured,cat:cm[p.category_id]?.id||String(p.category_id||''),categoryName:cm[p.category_id]?.name||'',images:im[p.id]||[]}));
-  window.products.splice(0,window.products.length,...mapped);
+  const oldCats=[...window.categories];
+  const sl={'أساور':'bracelets','طقومة':'sets','حلاق':'earrings','حلق':'earrings','كفوف':'hand','خلاخيل':'anklets'};
+  const cm={};
+  cs.forEach(c=>{const old=oldCats.find(x=>x.name===c.name);cm[c.id]={id:old?.id||sl[c.name]||String(c.id),name:c.name,image:c.image_url||old?.image||''}});
+  const im={}; ims.forEach(x=>(im[x.product_id]??=[]).push(x.image_url));
+  const data=ps.map(p=>({
+    id:p.id,name:p.name||'',weight:String(p.weight||''),code:p.code||'',description:p.description||'',
+    featured:!!p.featured,cat:cm[p.category_id]?.id||String(p.category_id||''),
+    categoryName:cm[p.category_id]?.name||'',images:im[p.id]||[],image:(im[p.id]||[])[0]||'',_supabase:true
+  }));
+  window.products.splice(0,window.products.length,...data);
   if(cs.length)window.categories.splice(0,window.categories.length,...cs.map(c=>({id:cm[c.id].id,name:c.name,image:cm[c.id].image||window.art(c.name,1)})));
-  window.alNajmaProductImage=(p,n=1)=>p?.images?.[n-1]||p?.images?.[0]||window.art(p?.categoryName||p?.name||'مصوغات النجمة',n);
-  const ce=document.getElementById('cats');
-  if(ce)ce.innerHTML=window.categories.map(c=>`<a class="card luxury-cat" href="#/category/${c.id}" data-category-id="${c.id}"><div class="cat-photo"><img src="${c.image}" alt="${c.name}"><span class="cat-glow"></span></div><div class="cat-label"><h3>${c.name}</h3><small>اكتشف المجموعة</small></div></a>`).join('');
-  const fe=document.getElementById('featured');
-  if(fe){const fp=mapped.filter(p=>p.featured), rows=fp.length?fp:mapped.slice().reverse().slice(0,6);fe.innerHTML=rows.map(window.productCard).join('')}
-  window.dispatchEvent(new HashChangeEvent('hashchange'));
- }catch(e){console.error('AL NAJMA Supabase:',e)}
+  window.alNajmaProductImage=(p,i=1)=>p?.images?.[0]||p?.image||window.art(p?.categoryName||'',i);
+
+  const cats=document.getElementById('cats');
+  if(cats)cats.innerHTML=window.categories.map(c=>`<a class="card luxury-cat" href="#/category/${c.id}" data-category-id="${c.id}"><div class="cat-photo"><img src="${c.image}" alt="${c.name}"><span class="cat-glow"></span></div><div class="cat-label"><h3>${c.name}</h3><small>اكتشف المجموعة</small></div></a>`).join('');
+
+  if(typeof renderSections==='function')renderSections();
+  if(typeof renderFeaturedPage==='function')renderFeaturedPage();
+
+  if(host){
+    const f=data.filter(p=>p.featured);
+    const list=(f.length?f:data).slice(0,6);
+    host.innerHTML=list.map((p,i)=>window.productCard(p,i)).join('');
+  }
+  window.dispatchEvent(new Event('hashchange'));
+ }catch(e){
+  console.error('Supabase load failed',e);
+  if(host)host.innerHTML='<div class="empty-state"><strong>تعذر تحميل القطع</strong><span>أعد تحميل الصفحة.</span></div>';
+ }
 })();
 </script>
 
