@@ -178,14 +178,6 @@ header{position:sticky;top:0;z-index:20;background:rgba(255,253,249,.94);backdro
 .empty-state{grid-column:1/-1;text-align:center;border:1px dashed var(--line);border-radius:var(--r-md);padding:28px 14px;color:var(--muted);background:var(--paper)}.empty-state strong{display:block;margin-bottom:6px}
 .search-box input,.search-panel input,.search-modal input,input[type="search"]{outline:none;box-shadow:none;-webkit-appearance:none;appearance:none}
 
-/* Keep live-data areas hidden until Supabase bridge finishes */
-body:not(.live-data-ready) #cats,
-body:not(.live-data-ready) #featured,
-body:not(.live-data-ready) #sectionsGallery,
-body:not(.live-data-ready) #categoryCover,
-body:not(.live-data-ready) #categoryProducts,
-body:not(.live-data-ready) #featuredFullGrid{visibility:hidden!important}
-
 /* Tablet / desktop enhancement; mobile remains the base */
 @media(min-width:650px){
   .wrap{padding-left:20px;padding-right:20px}
@@ -321,8 +313,12 @@ function productCard(p,i=0){return `<a class="product" href="#/product/${p.id}" 
 window.products=products;window.categories=categories;window.productCard=productCard;window.art=art;
 </script>
 <script>
-cats.innerHTML=categories.map((c,i)=>`<a class="card luxury-cat" href="#/category/${c.id}" data-category-id="${c.id}"><div class="cat-photo"><img src="${c.image}" alt="${c.name}"><span class="cat-glow"></span></div><div class="cat-label"><h3>${c.name}</h3><small>اكتشف المجموعة</small></div></a>`).join('');
-featured.innerHTML='';
+{
+ const catsHost=document.getElementById('cats');
+ const featuredHost=document.getElementById('featured');
+ if(catsHost)catsHost.innerHTML=categories.map((c,i)=>`<a class="card luxury-cat" href="#/category/${c.id}" data-category-id="${c.id}"><div class="cat-photo"><img src="${c.image}" alt="${c.name}"><span class="cat-glow"></span></div><div class="cat-label"><h3>${c.name}</h3><small>اكتشف المجموعة</small></div></a>`).join('');
+ if(featuredHost)featuredHost.innerHTML='';
+}
 </script>
 <script>
 (() => {
