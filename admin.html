@@ -66,7 +66,7 @@ function editCurrentCategory(){const c=categories.find(x=>x.id==currentCategory)
 async function compressImage(file){
  if(!file || !file.type.startsWith('image/')) return file;
  if(file.type==='image/gif' || file.type==='image/svg+xml') return file;
- const MAX=1800, QUALITY=.82;
+ const MAX=1600, QUALITY=.76;
  let bitmap;
  try{bitmap=await createImageBitmap(file)}catch(e){return file}
  let w=bitmap.width,h=bitmap.height;
