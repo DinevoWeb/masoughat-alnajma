@@ -35,9 +35,9 @@ button{border:0;border-radius:13px;padding:12px;background:var(--gold);color:#ff
 </section>
 
 <section id="productForm" class="hidden card"><div class="title"><button class="ghost" onclick="goBack()">← رجوع</button><h2 id="productFormTitle">إضافة قطعة</h2></div>
- <input id="productId" type="hidden"><div class="grid"><div><label>اسم القطعة</label><input id="pName"></div><div><label>الوزن</label><input id="pWeight"></div><div><label>الكود</label><input id="pCode" placeholder="اتركه فارغاً للتوليد التلقائي"></div><div><label>القسم</label><select id="pCategory"></select></div></div>
+ <input id="productId" type="hidden"><div class="grid"><div><label>اسم القطعة</label><input id="pName"></div><div><label>الوزن</label><input id="pWeight"></div><div><label>القسم</label><select id="pCategory"></select></div></div>
  <label><input id="pFeatured" type="checkbox" style="width:auto"> قطعة مميزة</label><label>الوصف</label><textarea id="pDescription"></textarea>
- <h3>الصور الحالية</h3><p style="color:var(--muted);font-size:12px">اسحب الصور لتغيير الترتيب. أول صورة هي الصورة الرئيسية.</p><div id="currentImages" class="images"></div>
+ <h3>الصور الحالية</h3><div id="currentImages" class="images"></div>
  <label>إضافة صور جديدة</label><input id="pImages" type="file" accept="image/*" multiple>
  <button onclick="saveProduct()">حفظ القطعة</button><button id="deleteProductBtn" class="danger hidden" onclick="deleteProduct()">حذف القطعة</button><div id="productMsg"></div>
 </section>
@@ -101,15 +101,102 @@ async function upload(file,path){
 }
 async function saveCategory(){try{msg('catMsg','جاري الحفظ...');let id=$('catId').value,name=$('catName').value.trim();if(!name)throw Error('اكتب اسم القسم');let image_url=categories.find(x=>x.id==id)?.image_url||null;const f=$('catImage').files[0];if(f){const ext=(f.name.split('.').pop()||'jpg').replace(/[^a-zA-Z0-9]/g,'');image_url=await upload(f,'categories/'+Date.now()+'-category.'+ext);}let q;if(id){q=sb.from('categories').update({name,image_url}).eq('id',Number(id)).select('id,name,image_url').single()}else{q=sb.from('categories').insert({name,image_url}).select('id,name,image_url').single()}const {data,error}=await q;if(error)throw Error('فشل حفظ القسم: '+error.message);await loadAll();msg('catMsg','تم حفظ القسم والصورة ✅');setTimeout(goHome,500)}catch(e){msg('catMsg',e.message,true)}}
 async function deleteCategory(){const id=Number($('catId').value),n=products.filter(p=>p.category_id==id).length;if(n){alert('هذا القسم يحتوي '+n+' قطعة. انقل أو احذف القطع أولاً.');return}if(!confirm('حذف القسم نهائياً؟'))return;try{await api('/rest/v1/categories?id=eq.'+id,{method:'DELETE'});currentCategory=null;await loadAll();goHome()}catch(e){msg('catMsg',e.message,true)}}
-function newProduct(cat=null){$('productId').value='';$('pName').value='';$('pWeight').value='';$('pCode').value='';$('pDescription').value='';$('pFeatured').checked=false;$('pImages').value='';$('currentImages').innerHTML='';$('productFormTitle').textContent='إضافة قطعة';$('deleteProductBtn').classList.add('hidden');fillCategories();if(cat)$('pCategory').value=cat;msg('productMsg','');show('productForm')}
-function editProduct(id){const p=products.find(x=>x.id==id);if(!p)return;currentCategory=p.category_id;$('productId').value=p.id;$('pName').value=p.name||'';$('pWeight').value=p.weight||'';$('pCode').value=p.code||'';$('pDescription').value=p.description||'';$('pFeatured').checked=!!p.featured;fillCategories();$('pCategory').value=p.category_id;$('productFormTitle').textContent='تعديل '+p.name;$('deleteProductBtn').classList.remove('hidden');$('pImages').value='';renderImages(id);msg('productMsg','');show('productForm')}
-function renderImages(pid){const list=images.filter(x=>x.product_id==pid).sort((a,b)=>(a.sort_order||0)-(b.sort_order||0));$('currentImages').innerHTML=list.map((x,i)=>`<div class="image-item" draggable="true" data-id="${x.id}" ondragstart="dragStart(event)" ondragover="event.preventDefault()" ondrop="dropImage(event)" ontouchstart="touchPick(${x.id})"><img src="${esc(x.image_url)}">${i===0?'<span class="main-badge">الرئيسية</span>':''}<div class="bar"><button class="danger" onclick="event.stopPropagation();deleteImage(${x.id})">حذف</button></div></div>`).join('')}
-function dragStart(e){dragId=Number(e.currentTarget.dataset.id)}async function dropImage(e){e.preventDefault();const to=Number(e.currentTarget.dataset.id);if(dragId&&to&&dragId!==to)await reorderImages(dragId,to)}function touchPick(id){dragId=id}
-async function reorderImages(from,to){const pid=Number($('productId').value),list=images.filter(x=>x.product_id==pid).sort((a,b)=>(a.sort_order||0)-(b.sort_order||0)),a=list.findIndex(x=>x.id==from),b=list.findIndex(x=>x.id==to);if(a<0||b<0)return;const [m]=list.splice(a,1);list.splice(b,0,m);try{for(let i=0;i<list.length;i++)await api('/rest/v1/product_images?id=eq.'+list[i].id,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({sort_order:i+1})});await loadAll();renderImages(pid)}catch(e){alert(e.message)}}
+function newProduct(cat=null){$('productId').value='';$('pName').value='';$('pWeight').value='';$('pDescription').value='';$('pFeatured').checked=false;$('pImages').value='';$('currentImages').innerHTML='';$('productFormTitle').textContent='إضافة قطعة';$('deleteProductBtn').classList.add('hidden');fillCategories();if(cat)$('pCategory').value=cat;msg('productMsg','');show('productForm')}
+function editProduct(id){const p=products.find(x=>x.id==id);if(!p)return;currentCategory=p.category_id;$('productId').value=p.id;$('pName').value=p.name||'';$('pWeight').value=p.weight||'';$('pDescription').value=p.description||'';$('pFeatured').checked=!!p.featured;fillCategories();$('pCategory').value=p.category_id;$('productFormTitle').textContent='تعديل '+p.name;$('deleteProductBtn').classList.remove('hidden');$('pImages').value='';renderImages(id);msg('productMsg','');show('productForm')}
+function renderImages(pid){
+ const list=images.filter(x=>x.product_id==pid).sort((a,b)=>(a.sort_order||0)-(b.sort_order||0));
+ $('currentImages').innerHTML=list.map((x,i)=>`<div class="image-item"><img src="${esc(x.image_url)}">${i===0?'<span class="main-badge">الرئيسية</span>':''}<div class="bar"><button class="danger" onclick="deleteImage(${x.id})">حذف</button></div></div>`).join('')
+}
 async function deleteImage(id){if(!confirm('حذف هذه الصورة؟'))return;try{await api('/rest/v1/product_images?id=eq.'+id,{method:'DELETE'});await loadAll();renderImages(Number($('productId').value))}catch(e){alert(e.message)}}
-async function addImages(pid,files){let n=images.filter(x=>x.product_id==pid).length;for(const f of files){n++;const ext=(f.name.split('.').pop()||'jpg').replace(/[^a-zA-Z0-9]/g,'');const path=pid+'/'+Date.now()+'-'+n+'.'+ext,url=await upload(f,path);await api('/rest/v1/product_images',{method:'POST',headers:{'Content-Type':'application/json',Prefer:'return=minimal'},body:JSON.stringify({product_id:Number(pid),image_url:url,sort_order:n})})}}
-async function saveProduct(){try{msg('productMsg','جاري الحفظ ورفع الصور...');const id=$('productId').value;const data={name:$('pName').value.trim(),weight:$('pWeight').value.trim(),description:$('pDescription').value.trim(),featured:$('pFeatured').checked,category_id:Number($('pCategory').value)};if(!data.name)throw Error('اكتب اسم القطعة');if($('pCode').value.trim())data.code=$('pCode').value.trim();let pid;if(id){await api('/rest/v1/products?id=eq.'+id,{method:'PATCH',headers:{'Content-Type':'application/json',Prefer:'return=minimal'},body:JSON.stringify(data)});pid=Number(id)}else{const r=await api('/rest/v1/products',{method:'POST',headers:{'Content-Type':'application/json',Prefer:'return=representation'},body:JSON.stringify(data)});pid=r[0].id}await addImages(pid,[...$('pImages').files]);currentCategory=data.category_id;await loadAll();openCategory(currentCategory)}catch(e){msg('productMsg',e.message,true)}}
-async function deleteProduct(){const id=Number($('productId').value);if(!confirm('حذف القطعة وصورها من القائمة نهائياً؟'))return;try{await api('/rest/v1/product_images?product_id=eq.'+id,{method:'DELETE'});await api('/rest/v1/products?id=eq.'+id,{method:'DELETE'});await loadAll();openCategory(currentCategory)}catch(e){msg('productMsg',e.message,true)}}
+async function addImages(pid,files){
+ let n=images.filter(x=>x.product_id==pid).length,added=[];
+ for(const f of files){
+  n++;
+  const ext=(f.name.split('.').pop()||'jpg').replace(/[^a-zA-Z0-9]/g,'');
+  const path=pid+'/'+Date.now()+'-'+n+'.'+ext;
+  const url=await upload(f,path);
+  await api('/rest/v1/product_images',{method:'POST',headers:{'Content-Type':'application/json',Prefer:'return=minimal'},body:JSON.stringify({product_id:Number(pid),image_url:url,sort_order:n})});
+  added.push({path,url});
+ }
+ return added;
+}
+async function saveProduct(){
+ let createdPid=null,uploaded=[];
+ try{
+  msg('productMsg','جاري الحفظ ورفع الصور...');
+  const id=$('productId').value;
+  const files=[...$('pImages').files];
+  const data={name:$('pName').value.trim(),weight:$('pWeight').value.trim(),description:$('pDescription').value.trim(),featured:$('pFeatured').checked,category_id:Number($('pCategory').value)};
+  if(!data.name)throw Error('اكتب اسم القطعة');
+  
+
+  let pid;
+  if(id){
+   await api('/rest/v1/products?id=eq.'+id,{method:'PATCH',headers:{'Content-Type':'application/json',Prefer:'return=minimal'},body:JSON.stringify(data)});
+   pid=Number(id);
+   await addImages(pid,files);
+  }else{
+   if(!files.length)throw Error('اختر صورة واحدة على الأقل للقطعة');
+   const r=await api('/rest/v1/products',{method:'POST',headers:{'Content-Type':'application/json',Prefer:'return=representation'},body:JSON.stringify(data)});
+   pid=r[0].id;
+   createdPid=pid;
+   try{
+    uploaded=await addImages(pid,files);
+   }catch(uploadError){
+    try{await api('/rest/v1/product_images?product_id=eq.'+pid,{method:'DELETE'})}catch(e){}
+    for(const x of uploaded){try{await sb.storage.from(BUCKET).remove([x.path])}catch(e){}}
+    try{await api('/rest/v1/products?id=eq.'+pid,{method:'DELETE'})}catch(e){}
+    createdPid=null;
+    throw Error('فشل رفع الصور، لذلك لم يتم حفظ القطعة. '+uploadError.message);
+   }
+  }
+
+  $('pImages').value='';
+  currentCategory=data.category_id;
+  await loadAll();
+  openCategory(currentCategory);
+ }catch(e){
+  msg('productMsg',e.message,true);
+ }
+}
+async function deleteProduct(){
+ const id=Number($('productId').value);
+ if(!confirm('حذف القطعة وصورها نهائياً؟'))return;
+ const btn=$('deleteProductBtn');
+ const oldText=btn.textContent;
+ btn.disabled=true;
+ btn.textContent='جاري الحذف...';
+ msg('productMsg','جاري حذف القطعة وصورها...');
+ try{
+  const productImages=images.filter(x=>x.product_id==id);
+  const paths=productImages.map(x=>{
+   try{
+    const u=new URL(x.image_url);
+    const marker='/storage/v1/object/public/'+BUCKET+'/';
+    const i=u.pathname.indexOf(marker);
+    return i>=0?decodeURIComponent(u.pathname.slice(i+marker.length)):null;
+   }catch(e){return null}
+  }).filter(Boolean);
+
+  if(paths.length){
+   const {error:storageError}=await sb.storage.from(BUCKET).remove(paths);
+   if(storageError)throw Error('تعذر حذف ملفات الصور من Storage: '+storageError.message);
+  }
+
+  await api('/rest/v1/product_images?product_id=eq.'+id,{method:'DELETE'});
+  await api('/rest/v1/products?id=eq.'+id,{method:'DELETE'});
+
+  products=products.filter(x=>x.id!=id);
+  images=images.filter(x=>x.product_id!=id);
+  const backCategory=currentCategory;
+  renderDashboard();
+  if(backCategory)openCategory(backCategory);else goHome();
+ }catch(e){
+  msg('productMsg','فشل الحذف: '+e.message,true);
+  btn.disabled=false;
+  btn.textContent=oldText;
+ }
+}
 sb.auth.onAuthStateChange((event,session)=>{token=session?.access_token||'';});
 start();
 </script></body></html>
