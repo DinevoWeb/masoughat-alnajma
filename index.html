@@ -39,33 +39,32 @@ header{position:sticky;top:0;z-index:20;background:rgba(255,253,249,.94);backdro
 .icon{width:42px;height:42px;flex:none;border:1px solid var(--gold-soft);border-radius:50%;display:grid;place-items:center;background:var(--paper);color:var(--ink);cursor:pointer;box-shadow:0 5px 16px rgba(49,38,16,.035)}
 
 /* Hero */
-.hero{padding:18px 0 12px;text-align:center}
-.premium-hero{padding:16px 0 10px}
-.hero-banner{position:relative;margin:0 auto;max-width:960px;aspect-ratio:1/1.15;border-radius:var(--r-lg);overflow:hidden;background:#191611;box-shadow:var(--shadow-lg)}
+.hero{padding:16px 0 8px;text-align:center}
+.premium-hero{padding:14px 0 8px}
+.hero-banner{position:relative;margin:0 auto;max-width:960px;height:clamp(155px,24vh,205px);border-radius:20px;overflow:hidden;background:#191611;box-shadow:var(--shadow-lg)}
 .hero-banner>img{width:100%;height:100%;object-fit:cover;object-position:center;display:block}
 .hero-shade{position:absolute;inset:0;background:linear-gradient(to top,rgba(16,13,8,.78) 0%,rgba(16,13,8,.24) 48%,rgba(16,13,8,.02) 76%)}
-.hero-copy{position:absolute;z-index:2;right:22px;left:22px;bottom:24px;text-align:right;color:#fff;text-shadow:0 2px 15px rgba(0,0,0,.28)}
-.hero-copy h1{margin:0 0 7px;color:#fff;font-size:clamp(30px,8vw,48px);font-weight:700;line-height:1.25}
-.hero-copy p{margin:0;color:#f4ead6;font-size:14px;font-weight:500;line-height:1.8}
+.hero-copy{position:absolute;z-index:2;right:18px;left:18px;bottom:15px;text-align:right;color:#fff;text-shadow:0 2px 15px rgba(0,0,0,.28)}
+.hero-copy h1{margin:0 0 4px;color:#fff;font-size:clamp(22px,6vw,34px);font-weight:700;line-height:1.25}
+.hero-copy p{margin:0;color:#f4ead6;font-size:11px;font-weight:500;line-height:1.65}
 
 /* Shared headings */
-.section{padding:34px 0 10px}
-.section-title{text-align:center;font-size:27px;margin:0 0 13px;font-weight:700}
+.section{padding:28px 0 8px}
+.section-title{text-align:center;font-size:25px;margin:0 0 11px;font-weight:700}
 .rule{width:76px;height:1px;background:var(--gold-soft);margin:0 auto 24px;position:relative}
 .rule:after{content:"◆";position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);background:#faf7f1;padding:0 9px;color:var(--gold);font-size:9px}
 .page-title-btn{display:block;margin:0 auto;background:none;border:0;color:inherit;cursor:pointer;padding:0}
 .page-title-btn .section-title span{color:var(--gold);font-size:.65em}
 
 /* Category cards */
-.cats{display:flex;gap:12px;overflow-x:auto;padding:2px 1px 13px;scroll-snap-type:x mandatory;scrollbar-width:none}
-.cats::-webkit-scrollbar{display:none}
-.card{flex:0 0 44%;min-width:148px;max-width:190px;scroll-snap-align:start;background:var(--paper);border:1px solid var(--line);border-radius:var(--r-md);overflow:hidden;box-shadow:var(--shadow)}
-.luxury-cat .cat-photo{position:relative;overflow:hidden;aspect-ratio:1/1.13;background:var(--soft)}
+.cats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px;padding:2px 0 10px}
+.card{min-width:0;background:var(--paper);border:1px solid var(--line);border-radius:18px;overflow:hidden;box-shadow:0 9px 25px rgba(67,52,25,.065)}
+.luxury-cat .cat-photo{position:relative;overflow:hidden;aspect-ratio:1.18/1;background:var(--soft)}
 .luxury-cat .cat-photo img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .35s ease}
 .cat-glow{position:absolute;inset:0;background:linear-gradient(to top,rgba(25,20,12,.25),transparent 50%)}
-.cat-label{text-align:center;padding:12px 8px 14px}
-.cat-label h3,.card h3{margin:0;color:var(--ink);font-size:16px}
-.cat-label small{display:block;margin-top:3px;color:var(--gold);font-size:9px;letter-spacing:.2px}
+.cat-label{text-align:center;padding:10px 7px 11px}
+.cat-label h3,.card h3{margin:0;color:var(--ink);font-size:14px}
+.cat-label small{display:block;margin-top:2px;color:var(--gold);font-size:8.5px;letter-spacing:.15px}
 
 /* Product cards */
 .products{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}
@@ -78,13 +77,13 @@ header{position:sticky;top:0;z-index:20;background:rgba(255,253,249,.94);backdro
 .category-product-info small{display:block;margin-top:5px;color:var(--muted);font-size:9px}
 
 /* Featured horizontal track */
-#featured.products{display:flex;overflow-x:auto;overflow-y:hidden;gap:11px;padding:2px 1px 14px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+#featured.products{display:flex;gap:11px;overflow-x:auto;overflow-y:hidden;padding:2px 1px 12px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none}
 #featured.products::-webkit-scrollbar{display:none}
-#featured .product{flex:0 0 38%;min-width:132px;max-width:160px;scroll-snap-align:start}
-#featured .product img{aspect-ratio:1/1}
-#featured .pinfo{padding:9px}
-#featured .pinfo h3{font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:6px}
-#featured .pill{font-size:9.5px;padding:4px 7px}
+#featured .product{flex:0 0 43%;min-width:142px;max-width:168px;border-radius:18px;scroll-snap-align:start}
+#featured .product img{aspect-ratio:1.08/1;object-fit:cover}
+#featured .pinfo{padding:10px}
+#featured .pinfo h3{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:6px}
+#featured .pill{font-size:9px;padding:4px 7px}
 
 /* Toolbar */
 .toolbar{display:flex;flex-direction:column;gap:9px;margin:0 0 22px}
@@ -165,9 +164,24 @@ header{position:sticky;top:0;z-index:20;background:rgba(255,253,249,.94);backdro
 .brand-icon,.contact-icon{width:50px;height:50px;border-radius:15px;display:grid;place-items:center;flex:none;background:var(--cream);color:var(--gold);font-size:20px}.brand-icon svg{width:25px;height:25px;fill:var(--gold)}
 .contact-arrow,.contact-card>span{color:var(--gold);font-size:17px}
 
+
+.drawer-brand-signature{
+ margin-top:auto;padding:22px 4px 4px;border-top:1px solid var(--line);
+ text-align:center;color:var(--muted)
+}
+.drawer-brand-signature .sig-mark{
+ display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:8px
+}
+.drawer-brand-signature .sig-mark span{width:32px;height:1px;background:var(--gold-soft)}
+.drawer-brand-signature .sig-mark i{font-style:normal;color:var(--gold);font-size:8px}
+.drawer-brand-signature strong{display:block;font-size:15px;letter-spacing:.1px}
+.drawer-brand-signature small{display:block;margin-top:4px;color:var(--gold);font-family:Georgia,serif;letter-spacing:1.4px;font-size:8px}
+.drawer-brand-signature p{margin:9px 0 0;color:var(--muted);font-size:9px}
+.global-luxury-footer{display:none!important}
+
 /* Footer */
-.luxury-home-footer{display:none!important}
-.global-luxury-footer{width:100%;text-align:center;padding:21px 18px 18px;margin-top:28px;border-top:1px solid var(--line);background:linear-gradient(180deg,var(--paper),var(--cream))}
+.luxury-home-footer{display:block!important}
+.global-luxury-footer{display:block!important;width:100%;text-align:center;padding:21px 18px 18px;margin-top:28px;border-top:1px solid var(--line);background:linear-gradient(180deg,var(--paper),var(--cream))}
 .global-footer-line{display:flex;align-items:center;justify-content:center;gap:9px;margin-bottom:10px}.global-footer-line span{width:40px;height:1px;background:linear-gradient(90deg,transparent,var(--gold))}.global-footer-line span:last-child{background:linear-gradient(90deg,var(--gold),transparent)}.global-footer-line i{font-style:normal;color:var(--gold);font-size:8px}
 .global-footer-brand{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:0}
 .global-footer-brand>div{display:contents}.global-footer-brand small{display:block;margin:0 0 3px;font-family:Georgia,serif;letter-spacing:2px;color:var(--gold);font-size:7px}.global-footer-brand strong{display:block;font-size:17px}.global-footer-brand p{display:block;margin:5px 0 0;padding:0;border:0;color:var(--gold);font-size:10px}
@@ -182,10 +196,11 @@ header{position:sticky;top:0;z-index:20;background:rgba(255,253,249,.94);backdro
 @media(min-width:650px){
   .wrap{padding-left:20px;padding-right:20px}
   .head{height:84px}.brand strong{font-size:27px}
-  .hero-banner{aspect-ratio:1.55/1}.hero-copy{right:6%;left:6%;bottom:7%}.hero-copy p{font-size:17px}
-  .cats{display:grid;grid-template-columns:repeat(5,1fr);overflow:visible}.card{min-width:0;max-width:none}
+  .hero-banner{height:410px}.hero-copy{right:6%;left:6%;bottom:7%}.hero-copy p{font-size:17px}
+  .cats{grid-template-columns:repeat(5,1fr);gap:14px}.card{min-width:0;max-width:none}
   .products{grid-template-columns:repeat(4,1fr);gap:15px}
-  #featured .product{flex-basis:170px;max-width:170px}
+  #featured.products{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;overflow:visible}
+  #featured .product{min-width:0;max-width:none}
   .toolbar{flex-direction:row}.toolbar input{flex:1}
   .featured-full-grid{grid-template-columns:repeat(3,1fr);gap:14px}
   .sections-gallery{grid-template-columns:repeat(3,1fr);gap:14px}.section-tile:first-child{grid-column:auto;aspect-ratio:1/1.18}
@@ -212,7 +227,12 @@ header{position:sticky;top:0;z-index:20;background:rgba(255,253,249,.94);backdro
     <a href="#" data-route="#/featured" ;closeDrawer();return false">القطع المميزة <span>←</span></a>
     <a href="#/contact" onclick="closeDrawer();showPage('contactPage');history.pushState(null,'','#/contact');window.scrollTo(0,0);return false">تواصل معنا <span>←</span></a>
   </nav>
-  <div class="drawer-note">مصوغات النجمة<br><small>تصاميم راقية ولمسات ذهبية فاخرة</small></div>
+  <div class="drawer-brand-signature" aria-label="هوية مصوغات النجمة">
+  <div class="sig-mark"><span></span><i>◆</i><span></span></div>
+  <strong>مصوغات النجمة</strong>
+  <small>AL NAJMA JEWELLERY</small>
+  <p>© مصوغات النجمة</p>
+</div>
 </aside>
 
 <section class="search-panel" id="searchPanel" aria-hidden="true">
@@ -497,7 +517,7 @@ window.products=products;window.categories=categories;window.productCard=product
         <img src="${(window.alNajmaProductImage&&window.alNajmaProductImage(p,i+2))||art(cname(p.cat),i+2)}" alt="${p.name}">
         <div class="result-text"><strong>${p.name}</strong><small>${cname(p.cat)} · ${p.code} · الوزن: ${p.weight}</small></div>
         <span class="result-arrow">←</span>
-      </button>`).join('') : '<div class="no-results">ما لقينا قطعة مطابقة للبحث.</div>';
+      </button>`).join('') : '<div class="no-results">لا توجد نتائج مطابقة.</div>';
   }
 
   function hashForPage(id,anchor){
